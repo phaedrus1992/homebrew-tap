@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           persist-credentials: true
 
@@ -52,54 +52,56 @@ jobs:
           MACOS_X64: ${{ inputs.macos_x64 }}
           MACOS_ARM: ${{ inputs.macos_arm }}
         run: |
-          python3 - << 'EOF'
+          python3 - << 'PYEOF'
           import os
+          import textwrap
 
-          version  = os.environ["VERSION"]
+          version   = os.environ["VERSION"]
           linux_x64 = os.environ["LINUX_X64"]
           macos_x64 = os.environ["MACOS_X64"]
           macos_arm = os.environ["MACOS_ARM"]
           base = f"https://github.com/phaedrus1992/llmenv/releases/download/v{version}"
 
-          formula = f"""\
-class Llmenv < Formula
-  desc "Dynamic LLM environment manager — scope-based config for AI coding agents"
-  homepage "https://phaedrus1992.github.io/llmenv/"
-  license "MIT OR Apache-2.0"
-  version "{version}"
+          formula = textwrap.dedent(f"""\
+              class Llmenv < Formula
+                desc "Dynamic LLM environment manager — scope-based config for AI coding agents"
+                homepage "https://phaedrus1992.github.io/llmenv/"
+                license "MIT OR Apache-2.0"
+                version "{version}"
 
-  on_macos do
-    on_arm do
-      url "{base}/llmenv-macos-aarch64"
-      sha256 "{macos_arm}"
-    end
-    on_intel do
-      url "{base}/llmenv-macos-x86_64"
-      sha256 "{macos_x64}"
-    end
-  end
+                on_macos do
+                  on_arm do
+                    url "{base}/llmenv-macos-aarch64"
+                    sha256 "{macos_arm}"
+                  end
+                  on_intel do
+                    url "{base}/llmenv-macos-x86_64"
+                    sha256 "{macos_x64}"
+                  end
+                end
 
-  on_linux do
-    on_intel do
-      url "{base}/llmenv-linux-x86_64"
-      sha256 "{linux_x64}"
-    end
-  end
+                on_linux do
+                  on_intel do
+                    url "{base}/llmenv-linux-x86_64"
+                    sha256 "{linux_x64}"
+                  end
+                end
 
-  def install
-    bin.install Dir["llmenv-*"].first => "llmenv"
-  end
+                def install
+                  bin.install Dir["llmenv-*"].first => "llmenv"
+                end
 
-  test do
-    system bin/"llmenv", "--version"
-  end
-end
-"""
+                test do
+                  system bin/"llmenv", "--version"
+                end
+              end
+          """)
+
           with open("Formula/llmenv.rb", "w") as f:
               f.write(formula)
 
           print(f"Formula updated to v{version}")
-          EOF
+          PYEOF
 
       - name: Commit and push
         env:
