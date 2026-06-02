@@ -1,0 +1,113 @@
+name: Update Homebrew Formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.0.2)"
+        required: true
+      linux_x64:
+        description: "SHA256 for llmenv-linux-x86_64"
+        required: true
+      macos_x64:
+        description: "SHA256 for llmenv-macos-x86_64"
+        required: true
+      macos_arm:
+        description: "SHA256 for llmenv-macos-aarch64"
+        required: true
+
+jobs:
+  update-formula:
+    name: Update formula
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: true
+
+      - name: Validate inputs
+        env:
+          VERSION: ${{ inputs.version }}
+          LINUX_X64: ${{ inputs.linux_x64 }}
+          MACOS_X64: ${{ inputs.macos_x64 }}
+          MACOS_ARM: ${{ inputs.macos_arm }}
+        run: |
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: version must be semver (got: ${VERSION})" >&2
+            exit 1
+          fi
+          for checksum in "${LINUX_X64}" "${MACOS_X64}" "${MACOS_ARM}"; do
+            if [[ ! "${checksum}" =~ ^[a-f0-9]{64}$ ]]; then
+              echo "Error: invalid SHA256 (got: ${checksum})" >&2
+              exit 1
+            fi
+          done
+
+      - name: Regenerate formula
+        env:
+          VERSION: ${{ inputs.version }}
+          LINUX_X64: ${{ inputs.linux_x64 }}
+          MACOS_X64: ${{ inputs.macos_x64 }}
+          MACOS_ARM: ${{ inputs.macos_arm }}
+        run: |
+          python3 - << 'EOF'
+          import os
+
+          version  = os.environ["VERSION"]
+          linux_x64 = os.environ["LINUX_X64"]
+          macos_x64 = os.environ["MACOS_X64"]
+          macos_arm = os.environ["MACOS_ARM"]
+          base = f"https://github.com/phaedrus1992/llmenv/releases/download/v{version}"
+
+          formula = f"""\
+class Llmenv < Formula
+  desc "Dynamic LLM environment manager — scope-based config for AI coding agents"
+  homepage "https://phaedrus1992.github.io/llmenv/"
+  license "MIT OR Apache-2.0"
+  version "{version}"
+
+  on_macos do
+    on_arm do
+      url "{base}/llmenv-macos-aarch64"
+      sha256 "{macos_arm}"
+    end
+    on_intel do
+      url "{base}/llmenv-macos-x86_64"
+      sha256 "{macos_x64}"
+    end
+  end
+
+  on_linux do
+    on_intel do
+      url "{base}/llmenv-linux-x86_64"
+      sha256 "{linux_x64}"
+    end
+  end
+
+  def install
+    bin.install Dir["llmenv-*"].first => "llmenv"
+  end
+
+  test do
+    system bin/"llmenv", "--version"
+  end
+end
+"""
+          with open("Formula/llmenv.rb", "w") as f:
+              f.write(formula)
+
+          print(f"Formula updated to v{version}")
+          EOF
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/llmenv.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update llmenv formula to v${VERSION}"
+          git push
