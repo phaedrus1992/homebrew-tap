@@ -12,6 +12,9 @@ on:
       macos_x64:
         description: "SHA256 for llmenv-macos-x86_64"
         required: true
+      linux_arm:
+        description: "SHA256 for llmenv-linux-aarch64"
+        required: true
       macos_arm:
         description: "SHA256 for llmenv-macos-aarch64"
         required: true
@@ -31,6 +34,7 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           LINUX_X64: ${{ inputs.linux_x64 }}
+          LINUX_ARM: ${{ inputs.linux_arm }}
           MACOS_X64: ${{ inputs.macos_x64 }}
           MACOS_ARM: ${{ inputs.macos_arm }}
         run: |
@@ -38,7 +42,7 @@ jobs:
             echo "Error: version must be semver (got: ${VERSION})" >&2
             exit 1
           fi
-          for checksum in "${LINUX_X64}" "${MACOS_X64}" "${MACOS_ARM}"; do
+          for checksum in "${LINUX_X64}" "${LINUX_ARM}" "${MACOS_X64}" "${MACOS_ARM}"; do
             if [[ ! "${checksum}" =~ ^[a-f0-9]{64}$ ]]; then
               echo "Error: invalid SHA256 (got: ${checksum})" >&2
               exit 1
@@ -49,6 +53,7 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           LINUX_X64: ${{ inputs.linux_x64 }}
+          LINUX_ARM: ${{ inputs.linux_arm }}
           MACOS_X64: ${{ inputs.macos_x64 }}
           MACOS_ARM: ${{ inputs.macos_arm }}
         run: |
@@ -58,6 +63,7 @@ jobs:
 
           version   = os.environ["VERSION"]
           linux_x64 = os.environ["LINUX_X64"]
+          linux_arm = os.environ["LINUX_ARM"]
           macos_x64 = os.environ["MACOS_X64"]
           macos_arm = os.environ["MACOS_ARM"]
           base = f"https://github.com/phaedrus1992/llmenv/releases/download/v{version}"
@@ -81,6 +87,10 @@ jobs:
                 end
 
                 on_linux do
+                  on_arm do
+                    url "{base}/llmenv-linux-aarch64"
+                    sha256 "{linux_arm}"
+                  end
                   on_intel do
                     url "{base}/llmenv-linux-x86_64"
                     sha256 "{linux_x64}"
