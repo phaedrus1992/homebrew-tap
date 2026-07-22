@@ -2,27 +2,27 @@ class Llmenv < Formula
   desc "Dynamic LLM environment manager — scope-based config for AI coding agents"
   homepage "https://phaedrus1992.github.io/llmenv/"
   license "MIT OR Apache-2.0"
-  version "3.5.1"
+  version "3.6.0"
 
   on_macos do
     on_arm do
-      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.5.1/llmenv-macos-aarch64"
-      sha256 "3a9c632403fac2069dc4009ec0a070b1611792be9f9f47f80cbbf00907af8242"
+      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.6.0/llmenv-macos-aarch64"
+      sha256 "566b44957e1abb4d6f9c357d74660aa6a173cf7ad0e977da632b575df0c78cda"
     end
     on_intel do
-      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.5.1/llmenv-macos-x86_64"
-      sha256 "fbe183b7269aec4877b8b634599aa9d6ab55fbf57efcfa85666ae1c0c9596ed3"
+      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.6.0/llmenv-macos-x86_64"
+      sha256 "d043f206d11f69543abaecb2471a3aad3da1b0e7f92f9dcc85da88c41f2ec2a7"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.5.1/llmenv-linux-aarch64"
-      sha256 "3c2cb2facc7a9a76da1e58eae5c39ac24453f9fb5ce34cd87bc3a2513dfb44f7"
+      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.6.0/llmenv-linux-aarch64"
+      sha256 "56f384ef7d7fef79e386731fb2330012030734c740ec4dbb9638c4d728c18b2d"
     end
     on_intel do
-      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.5.1/llmenv-linux-x86_64"
-      sha256 "c0e1e9bf2bde528ca3c38b13f842da7b1c7e529a4208c09702847aa104fba51a"
+      url "https://github.com/phaedrus1992/llmenv/releases/download/v3.6.0/llmenv-linux-x86_64"
+      sha256 "d72fe797db24bddec3c6d82c0b032115331fb19d42bb0438d05ed51a77101312"
     end
   end
 
